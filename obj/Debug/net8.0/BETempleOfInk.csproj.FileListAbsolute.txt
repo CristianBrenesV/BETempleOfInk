@@ -167,3 +167,4 @@ C:\BETempleOfInk\obj\Debug\net8.0\refint\BETempleOfInk.dll
 C:\BETempleOfInk\obj\Debug\net8.0\BETempleOfInk.pdb
 C:\BETempleOfInk\obj\Debug\net8.0\BETempleOfInk.genruntimeconfig.cache
 C:\BETempleOfInk\obj\Debug\net8.0\ref\BETempleOfInk.dll
+C:\BETempleOfInk\obj\Debug\net8.0\BETempleOfInk.sourcelink.json
