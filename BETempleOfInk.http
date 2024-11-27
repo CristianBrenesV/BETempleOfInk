@@ -1,0 +1,6 @@
+@BETempleOfInk_HostAddress = http://localhost:5008
+
+GET {{BETempleOfInk_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
