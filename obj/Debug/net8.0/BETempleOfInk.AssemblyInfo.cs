@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BETempleOfInk")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c22a5f4099b959a2d427a151a8dd00f24c61d252")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+801abcbd579ecd65f0dd62b8e8cef4a59d7f8696")]
 [assembly: System.Reflection.AssemblyProductAttribute("BETempleOfInk")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BETempleOfInk")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -97,12 +97,13 @@ namespace BETempleOfInk.Controllers
                         CommandType = CommandType.StoredProcedure
                     };
 
+                    // Parámetros con tipos explícitos
                     command.Parameters.AddWithValue("@IdArtista", nuevaAgenda.IdArtista);
                     command.Parameters.AddWithValue("@Fecha", nuevaAgenda.Fecha);
-                    command.Parameters.AddWithValue("@HoraInicio", nuevaAgenda.HoraInicio);
-                    command.Parameters.AddWithValue("@HoraFin", nuevaAgenda.HoraFin);
-                    command.Parameters.AddWithValue("@Disponible", nuevaAgenda.Disponible);
-                    command.Parameters.AddWithValue("@EsMembresia", nuevaAgenda.EsMembresia);
+                    command.Parameters.Add("@HoraInicio", SqlDbType.Time).Value = nuevaAgenda.HoraInicio;
+                    command.Parameters.Add("@HoraFin", SqlDbType.Time).Value = nuevaAgenda.HoraFin;
+                    command.Parameters.AddWithValue("@Disponible", nuevaAgenda.Disponible.HasValue ? (object)nuevaAgenda.Disponible.Value : DBNull.Value);
+                    command.Parameters.AddWithValue("@EsMembresia", nuevaAgenda.EsMembresia.HasValue ? (object)nuevaAgenda.EsMembresia.Value : DBNull.Value);
 
                     await connection.OpenAsync();
                     await command.ExecuteNonQueryAsync();
@@ -110,11 +111,12 @@ namespace BETempleOfInk.Controllers
 
                 return CreatedAtAction(nameof(GetDisponibilidad), new { idArtista = nuevaAgenda.IdArtista }, nuevaAgenda);
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error al crear la agenda del artista.");
+                // Log error details
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error al crear la agenda del artista: {ex.Message}");
             }
-        }
+}
 
         // PUT: api/AgendaArtista/{idAgenda}
         [HttpPut("{idAgenda}")]
