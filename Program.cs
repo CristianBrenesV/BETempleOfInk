@@ -27,6 +27,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Habilitar CORS
+app.UseCors("AllowAll"); // Sólo se necesita esta línea una vez
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -37,11 +40,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Habilitar CORS
-app.UseCors("AllowAll");
-
-app.UseHttpsRedirection();
-
+// Habilitar controladores API
 app.MapControllers();
 
 app.Run();
