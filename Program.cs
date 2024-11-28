@@ -14,6 +14,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()   // Permite cualquier origen
+              .AllowAnyMethod()   // Permite cualquier método (GET, POST, PUT, DELETE, etc.)
+              .AllowAnyHeader();  // Permite cualquier encabezado
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -25,6 +36,9 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty; 
     });
 }
+
+// Habilitar CORS
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
