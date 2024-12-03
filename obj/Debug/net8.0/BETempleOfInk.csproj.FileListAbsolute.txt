@@ -168,3 +168,8 @@ C:\BETempleOfInk\obj\Debug\net8.0\BETempleOfInk.pdb
 C:\BETempleOfInk\obj\Debug\net8.0\BETempleOfInk.genruntimeconfig.cache
 C:\BETempleOfInk\obj\Debug\net8.0\ref\BETempleOfInk.dll
 C:\BETempleOfInk\obj\Debug\net8.0\BETempleOfInk.sourcelink.json
+C:\BETempleOfInk\bin\Debug\net8.0\publish\web.config
+C:\BETempleOfInk\bin\Debug\net8.0\publish\appsettings.Development.json
+C:\BETempleOfInk\bin\Debug\net8.0\publish\appsettings.json
+C:\BETempleOfInk\bin\Debug\net8.0\publish\BETempleOfInk.deps.json
+C:\BETempleOfInk\bin\Debug\net8.0\publish\BETempleOfInk.runtimeconfig.json
