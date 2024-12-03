@@ -31,7 +31,7 @@ namespace BETempleOfInk.Controllers
 
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("sp_ObtenerTodosAgendaArtista", connection)
+                    var command = new SqlCommand("sp_AgendaArtistaObtenerTodos", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
@@ -49,7 +49,8 @@ namespace BETempleOfInk.Controllers
                                 HoraInicio = reader.GetTimeSpan(3),
                                 HoraFin = reader.GetTimeSpan(4),
                                 Disponible = reader.GetBoolean(5),
-                                EsMembresia = reader.GetBoolean(6)
+                                EsMembresia = reader.GetBoolean(6),
+                                Publicar = reader.GetBoolean(7)
                             });
                         }
                     }
@@ -107,7 +108,8 @@ namespace BETempleOfInk.Controllers
                                 HoraInicio = reader.GetTimeSpan(3),
                                 HoraFin = reader.GetTimeSpan(4),
                                 Disponible = reader.GetBoolean(5),
-                                EsMembresia = reader.GetBoolean(6)
+                                EsMembresia = reader.GetBoolean(6),
+                                Publicar = reader.GetBoolean(7)
                             });
                         }
                     }
@@ -139,7 +141,7 @@ namespace BETempleOfInk.Controllers
                 // Conexión y ejecución del SP
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("sp_ObtenerAgendaPorId", connection)
+                    var command = new SqlCommand("sp_AgendaArtistaObtenerPorId", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
@@ -158,7 +160,8 @@ namespace BETempleOfInk.Controllers
                                 HoraInicio = reader.GetTimeSpan(3),
                                 HoraFin = reader.GetTimeSpan(4),
                                 Disponible = reader.GetBoolean(5),
-                                EsMembresia = reader.GetBoolean(6)
+                                EsMembresia = reader.GetBoolean(6),
+                                Publicar = reader.GetBoolean(7)
                             };
 
                             return Ok(agenda); 
@@ -194,7 +197,7 @@ namespace BETempleOfInk.Controllers
 
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("sp_InsertarAgendaArtista", connection)
+                    var command = new SqlCommand("sp_AgendaArtistaInsertar", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
@@ -206,7 +209,8 @@ namespace BETempleOfInk.Controllers
                     command.Parameters.Add("@HoraFin", SqlDbType.Time).Value = nuevaAgenda.HoraFin;
                     command.Parameters.AddWithValue("@Disponible", nuevaAgenda.Disponible.HasValue ? (object)nuevaAgenda.Disponible.Value : DBNull.Value);
                     command.Parameters.AddWithValue("@EsMembresia", nuevaAgenda.EsMembresia.HasValue ? (object)nuevaAgenda.EsMembresia.Value : DBNull.Value);
-
+                    command.Parameters.AddWithValue("@Publicar", nuevaAgenda.Publicar.HasValue ? (object)nuevaAgenda.Publicar.Value : DBNull.Value);
+                    
                     await connection.OpenAsync();
                     await command.ExecuteNonQueryAsync();
                 }
@@ -220,7 +224,7 @@ namespace BETempleOfInk.Controllers
             }
         }
 
-//PUT: api/AgendaArtista/{idAgenda} Actualizar
+        //PUT: api/AgendaArtista/{idAgenda} Actualizar
         [HttpPut("{idAgenda}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -238,7 +242,7 @@ namespace BETempleOfInk.Controllers
             {
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    using (var command = new SqlCommand("sp_ActualizarAgendaArtista", connection))
+                    using (var command = new SqlCommand("sp_AgendaArtistaActualizar", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
 
@@ -249,6 +253,7 @@ namespace BETempleOfInk.Controllers
                         command.Parameters.AddWithValue("@HoraFin", ActualizarAgenda.HoraFin == default ? DBNull.Value : ActualizarAgenda.HoraFin);
                         command.Parameters.AddWithValue("@Disponible", ActualizarAgenda.Disponible ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@EsMembresia", ActualizarAgenda.EsMembresia ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@Publicar", ActualizarAgenda.Publicar ?? (object)DBNull.Value);
 
                         await connection.OpenAsync();
                         await command.ExecuteNonQueryAsync();
@@ -287,7 +292,7 @@ namespace BETempleOfInk.Controllers
                 // Ejecutamos la actualización directamente aquí
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("sp_ActualizarPublicarOMembresiaAgendaArtista", connection)
+                    var command = new SqlCommand("sp_AgendaArtistaActualizarPublicarOMembresiaODisponible", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };

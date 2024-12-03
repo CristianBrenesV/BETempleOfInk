@@ -9,5 +9,6 @@ namespace BETempleOfInk.Models
         public TimeSpan HoraFin { get; set; }
         public bool? Disponible { get; set; }
         public bool? EsMembresia { get; set; }
+        public bool? Publicar { get; set; }
     }
 }
