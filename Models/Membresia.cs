@@ -9,5 +9,6 @@ namespace BETempleOfInk.Models
         public DateTime? FechaVencimiento { get; set; }
         public int? Duracion { get; set; }
         public byte? Publicar { get; set; }
+        
     }
 }
