@@ -244,7 +244,7 @@ namespace BETempleOfInk.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutMembresia(int id, [FromBody] MembresiaDto membresiaDto)
+        public async Task<IActionResult> PutMembresia(int idMembresia, [FromBody] MembresiaDto membresiaDto)
         {
             if (membresiaDto == null)
             {
@@ -260,7 +260,7 @@ namespace BETempleOfInk.Controllers
                         CommandType = CommandType.StoredProcedure
                     };
 
-                    command.Parameters.AddWithValue("@IdMembresia", id);
+                    command.Parameters.AddWithValue("@IdMembresia", idMembresia);
                     command.Parameters.AddWithValue("@Nivel", membresiaDto.Nivel);
                     command.Parameters.AddWithValue("@PrecioMensual", membresiaDto.PrecioMensual);
                     command.Parameters.AddWithValue("@FechaCreacion", membresiaDto.FechaCreacion);
