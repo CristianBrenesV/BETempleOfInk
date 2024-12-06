@@ -1,5 +1,8 @@
-public class ActualizarAgendaArtista
+namespace BETempleOfInk.Models
 {
-    public string? Campo { get; set; }  
-    public bool Valor { get; set; }    
+    public class ActualizarAgendaArtista
+    {
+        public string? Campo { get; set; }  
+        public bool Valor { get; set; }    
+    }
 }

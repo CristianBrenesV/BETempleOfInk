@@ -8,7 +8,7 @@ namespace BETempleOfInk.Models
         public DateTime? FechaCreacion { get; set; }
         public DateTime? FechaVencimiento { get; set; }
         public int? Duracion { get; set; }
-        public byte? Publicar { get; set; }
+        public bool? Publicar { get; set; }
         
     }
 }

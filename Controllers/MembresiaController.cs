@@ -19,9 +19,10 @@ namespace BETempleOfInk.Controllers
                                 ?? throw new InvalidOperationException("La cadena de conexión no está configurada.");
         }
 
-        // GET: api/MembresiasConBeneficios
-        [HttpGet("MembresiasConBeneficios")]
+        // GET: api/Membresias
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetMembresiasConBeneficios()
         {
@@ -31,12 +32,15 @@ namespace BETempleOfInk.Controllers
 
                 using (var connection = new SqlConnection(_connectionString))
                 {
+                    // Define el comando para ejecutar el SP
                     var command = new SqlCommand("sp_MembresiasConBeneficiosObtener", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
 
                     await connection.OpenAsync();
+
+                    // Ejecuta el lector de datos
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -56,6 +60,7 @@ namespace BETempleOfInk.Controllers
                     }
                 }
 
+                // Si hay datos, se retornan como respuesta
                 if (membresiasConBeneficios.Any())
                 {
                     return Ok(membresiasConBeneficios);
@@ -67,9 +72,11 @@ namespace BETempleOfInk.Controllers
             }
             catch (Exception ex)
             {
+                // Manejo de errores
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error interno del servidor: {ex.Message}");
             }
         }
+
         
         // POST: api/MembresiasCrear
         [HttpPost]
@@ -119,9 +126,120 @@ namespace BETempleOfInk.Controllers
             }
         }
 
+        // PATCH: api/Membresias/Actualizar/{idMembresia}
+        [HttpPatch("Actualizar/{idMembresia}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult UpdateMembresia(int idMembresia, [FromBody] ActualizarMembresia requestData)
+        {
+            // Verificamos si el requestData es nulo o si el campo 'Campo' está vacío.
+            if (requestData == null || string.IsNullOrEmpty(requestData.Campo))
+            {
+                return BadRequest(new { message = "El campo 'Campo' es obligatorio." });
+            }
+
+            try
+            {
+                // Ejecutamos la actualización directamente aquí
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    var command = new SqlCommand("sp_MembresiaActualizarPublicar", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+
+                    command.Parameters.AddWithValue("@IdMembresia", idMembresia);
+                    command.Parameters.AddWithValue("@Campo", requestData.Campo);
+                    command.Parameters.AddWithValue("@Valor", requestData.Valor);
+
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        return Ok(new { message = "Membresía actualizada correctamente." }); // Respuesta en JSON
+                    }
+                    else
+                    {
+                        return StatusCode(500, new { message = "Error al actualizar la membresía." }); // Respuesta en JSON
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                // Manejo de errores de SQL
+                return StatusCode(500, new { message = $"Error de base de datos: {ex.Message}" });
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores generales
+                return StatusCode(500, new { message = $"Error interno: {ex.Message}" });
+            }
+        }
+
+
+        // GET: api/Membresias/{idMembresia} Obtener membresía con beneficios por Id
+        [HttpGet("{idMembresia}")]
+        [ProducesResponseType(StatusCodes.Status200OK)] 
+        [ProducesResponseType(StatusCodes.Status400BadRequest)] 
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)] 
+        public async Task<ActionResult<MembresiaConBeneficiosDto>> GetMembresiaConBeneficiosById(int idMembresia)
+        {
+            // Validación de entrada
+            if (idMembresia <= 0)
+            {
+                return BadRequest("El ID de la membresía no es válido.");
+            }
+
+            try
+            {
+                // Conexión y ejecución del SP
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    var command = new SqlCommand("sp_MembresiaConBeneficiosObtenerPorId", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+                    command.Parameters.Add(new SqlParameter("@idMembresia", idMembresia));
+
+                    await connection.OpenAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            // Crear el DTO para devolver los datos
+                            var membresia = new MembresiaConBeneficiosDto
+                            {
+                                IdMembresia = reader.GetInt32(0),
+                                Nivel = reader.GetString(1),
+                                PrecioMensual = reader.GetDecimal(2),
+                                FechaCreacion = reader.GetDateTime(3),
+                                FechaVencimiento = reader.GetDateTime(4),
+                                Beneficios = reader.GetString(5), // Beneficios concatenados
+                                Duracion = reader.GetInt32(6),
+                                Publicar = reader.GetBoolean(7)
+                            };
+
+                            return Ok(membresia); // Retornar la membresía con sus beneficios
+                        }
+                        else
+                        {
+                            return NotFound(); // Si no se encuentra la membresía
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en el servidor: {ex.Message}");
+            }
+        }
+    
 
         // PUT: api/MembresiasActualizar/{id}
-        [HttpPut("MembresiasActualizar/{id}")]
+        [HttpPut("MembresiasActualizar/{idMembresia}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
