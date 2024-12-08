@@ -12,7 +12,7 @@ namespace BETempleOfInk.Data
         }
 
         public DbSet<Usuario>? Usuarios { get; set; }
-        public DbSet<Testimonio>? Testimonios { get; set; }
+        public DbSet<Testimonios>? Testimonios { get; set; }
         public DbSet<OpcionesMenu>? OpcionesMenus { get; set; }
         public DbSet<AgendaArtista>? AgendaArtistas { get; set; }
         public DbSet<Artista>? Artistas { get; set; }

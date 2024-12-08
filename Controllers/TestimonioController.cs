@@ -334,9 +334,8 @@ namespace BETempleOfInk.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en el servidor: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Error = $"Error en el servidor: {ex.Message}" });
             }
         }
-
     }
 }

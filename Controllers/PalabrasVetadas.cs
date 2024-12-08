@@ -165,7 +165,7 @@ namespace BETempleOfInk.Controllers
         }
 
         // PUT: api/PalabrasVetadas/{id}
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -207,6 +207,7 @@ namespace BETempleOfInk.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Error interno del servidor.", details = ex.Message });
             }
         }
+
 
         // DELETE: api/PalabrasVetadas/{id}
         [HttpDelete("{id}")]
