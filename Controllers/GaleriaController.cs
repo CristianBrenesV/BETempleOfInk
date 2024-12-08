@@ -15,22 +15,21 @@ namespace BETempleOfInk.Controllers
 
         public GaleriaController(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("La cadena de conexión no está configurada.");
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                                ?? throw new InvalidOperationException("La cadena de conexión no está configurada.");
         }
 
-        // GET: api/Galeria/Publicados
-        [HttpGet("Publicados")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Galeria>>> GetGaleriaPublicados()
+        // GET: api/Galeria
+        [HttpGet]
+        public async Task<IActionResult> GetGaleria()
         {
             try
             {
-                var galerias = new List<Galeria>();
+                var tatuajes = new List<Galeria>();
 
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("SP_ObtenerGaleriaPublicados", connection)
+                    var command = new SqlCommand("sp_TatuajesConSubcategoriasObtener", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
@@ -40,7 +39,7 @@ namespace BETempleOfInk.Controllers
                     {
                         while (await reader.ReadAsync())
                         {
-                            galerias.Add(new Galeria
+                            tatuajes.Add(new Galeria
                             {
                                 IdTatuaje = reader.GetInt32(0),
                                 NombreTatuaje = reader.GetString(1),
@@ -53,146 +52,185 @@ namespace BETempleOfInk.Controllers
                     }
                 }
 
-                return Ok(galerias);
+                return Ok(tatuajes);
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error en el servidor al obtener las galerías publicadas.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error interno del servidor: {ex.Message}");
             }
         }
 
-        // GET: api/Galeria/PorArtista/{idArtista}
-        [HttpGet("PorArtista/{idArtista}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Galeria>>> GetGaleriaPorArtista(int idArtista)
+        // GET: api/Galeria/{idTatuaje}
+        [HttpGet("{idTatuaje}")]
+        public async Task<IActionResult> GetGaleriaById(int idTatuaje)
         {
             try
             {
-                var galerias = new List<Galeria>();
-
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("sp_ObtenerGaleriaPorArtista", connection)
+                    var command = new SqlCommand("sp_TatuajesConSubcategoriasObtenerPorId", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
-
-                    command.Parameters.AddWithValue("@IdArtista", idArtista);
+                    command.Parameters.AddWithValue("@IdTatuaje", idTatuaje);
 
                     await connection.OpenAsync();
                     using (var reader = await command.ExecuteReaderAsync())
                     {
-                        while (await reader.ReadAsync())
+                        if (await reader.ReadAsync())
                         {
-                            galerias.Add(new Galeria
+                            var tatuaje = new Galeria
                             {
                                 IdTatuaje = reader.GetInt32(0),
                                 NombreTatuaje = reader.GetString(1),
                                 ImagenTatuaje = reader.GetString(2),
                                 FechaPublicacion = reader.GetDateTime(3),
-                                Publicar = reader.GetByte(4)
-                            });
+                                IdArtista = reader.GetInt32(4),
+                                Publicar = reader.GetByte(5)
+                            };
+
+                            return Ok(tatuaje);
+                        }
+                        else
+                        {
+                            return NotFound("Tatuaje no encontrado.");
                         }
                     }
                 }
-
-                if (galerias.Count == 0)
-                {
-                    return NotFound($"No se encontraron galerías para el artista con ID {idArtista}.");
-                }
-
-                return Ok(galerias);
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error en el servidor al obtener las galerías por artista.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error interno del servidor: {ex.Message}");
             }
         }
 
         // POST: api/Galeria
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> InsertGaleria(Galeria nuevaGaleria)
+        public async Task<IActionResult> CreateGaleria([FromBody] Galeria galeria, [FromQuery] string subcategoriasIds)
         {
+            if (galeria == null)
+            {
+                return BadRequest("Datos inválidos.");
+            }
+
             try
             {
-                if (nuevaGaleria == null)
-                {
-                    return BadRequest("Los datos de la galería son inválidos.");
-                }
-
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("sp_InsertarGaleria", connection)
+                    var command = new SqlCommand("sp_TatuajesConFiltrosInsertar", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
 
-                    command.Parameters.AddWithValue("@NombreTatuaje", nuevaGaleria.NombreTatuaje);
-                    command.Parameters.AddWithValue("@ImagenTatuaje", nuevaGaleria.ImagenTatuaje);
-                    command.Parameters.AddWithValue("@FechaPublicacion", nuevaGaleria.FechaPublicacion);
-                    command.Parameters.AddWithValue("@IdArtista", nuevaGaleria.IdArtista);
-                    command.Parameters.AddWithValue("@Publicar", nuevaGaleria.Publicar);
+                    command.Parameters.AddWithValue("@NombreTatuaje", galeria.NombreTatuaje);
+                    command.Parameters.AddWithValue("@ImagenTatuaje", galeria.ImagenTatuaje);
+                    command.Parameters.AddWithValue("@FechaPublicacion", galeria.FechaPublicacion);
+                    command.Parameters.AddWithValue("@IdArtista", galeria.IdArtista);
+                    command.Parameters.AddWithValue("@Publicar", galeria.Publicar);
+                    command.Parameters.AddWithValue("@SubcategoriasIds", subcategoriasIds);
 
                     await connection.OpenAsync();
-                    await command.ExecuteNonQueryAsync();
-                }
+                    var result = await command.ExecuteNonQueryAsync();
 
-                return CreatedAtAction(nameof(GetGaleriaPublicados), nuevaGaleria);
+                    if (result > 0)
+                    {
+                        return StatusCode(StatusCodes.Status201Created, "Tatuaje creado correctamente.");
+                    }
+                    else
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Error al insertar el tatuaje.");
+                    }
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error en el servidor al insertar la galería.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error interno del servidor: {ex.Message}");
             }
         }
 
-        // PUT: api/Galeria/{id}
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateGaleria(int id, Galeria galeriaActualizada)
+        // PUT: api/Galeria/{idTatuaje}
+        [HttpPut("{idTatuaje}")]
+        public async Task<IActionResult> UpdateGaleria(int idTatuaje, [FromBody] Galeria galeria, [FromQuery] string subcategoriasIds)
         {
+            if (galeria == null)
+            {
+                return BadRequest("Datos inválidos.");
+            }
+
             try
             {
-                if (id != galeriaActualizada.IdTatuaje)
-                {
-                    return BadRequest("El ID proporcionado no coincide con el ID de la galería.");
-                }
-
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    var command = new SqlCommand("sp_ActualizarGaleria", connection)
+                    var command = new SqlCommand("sp_TatuajesConFiltrosActualizar", connection)
                     {
                         CommandType = CommandType.StoredProcedure
                     };
 
-                    command.Parameters.AddWithValue("@IdTatuaje", id);
-                    command.Parameters.AddWithValue("@NombreTatuaje", galeriaActualizada.NombreTatuaje);
-                    command.Parameters.AddWithValue("@ImagenTatuaje", galeriaActualizada.ImagenTatuaje);
-                    command.Parameters.AddWithValue("@FechaPublicacion", galeriaActualizada.FechaPublicacion);
-                    command.Parameters.AddWithValue("@IdArtista", galeriaActualizada.IdArtista);
-                    command.Parameters.AddWithValue("@Publicar", galeriaActualizada.Publicar);
+                    command.Parameters.AddWithValue("@IdTatuaje", idTatuaje);
+                    command.Parameters.AddWithValue("@NombreTatuaje", galeria.NombreTatuaje);
+                    command.Parameters.AddWithValue("@ImagenTatuaje", galeria.ImagenTatuaje);
+                    command.Parameters.AddWithValue("@FechaPublicacion", galeria.FechaPublicacion);
+                    command.Parameters.AddWithValue("@IdArtista", galeria.IdArtista);
+                    command.Parameters.AddWithValue("@Publicar", galeria.Publicar);
+                    command.Parameters.AddWithValue("@SubcategoriasIds", subcategoriasIds);
 
                     await connection.OpenAsync();
-                    var rowsAffected = await command.ExecuteNonQueryAsync();
+                    var result = await command.ExecuteNonQueryAsync();
 
-                    if (rowsAffected == 0)
+                    if (result > 0)
                     {
-                        return NotFound($"No se encontró ninguna galería con ID {id}.");
+                        return Ok("Tatuaje actualizado correctamente.");
+                    }
+                    else
+                    {
+                        return NotFound("Tatuaje no encontrado.");
                     }
                 }
-
-                return NoContent();
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error en el servidor al actualizar la galería.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
+        // PATCH: api/Galeria/{idTatuaje}
+        [HttpPatch("{idTatuaje}")]
+        public async Task<IActionResult> UpdatePublicar(int idTatuaje, [FromBody] ActualizarGaleria actualizacion)
+        {
+            if (actualizacion == null || string.IsNullOrEmpty(actualizacion.Campo))
+            {
+                return BadRequest("Datos inválidos.");
+            }
+
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    var command = new SqlCommand("sp_TatuajesActualizarPublicar", connection)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+
+                    command.Parameters.AddWithValue("@IdTatuaje", idTatuaje);
+                    command.Parameters.AddWithValue("@Campo", actualizacion.Campo);
+                    command.Parameters.AddWithValue("@Valor", actualizacion.Valor);
+
+                    await connection.OpenAsync();
+                    var result = await command.ExecuteNonQueryAsync();
+
+                    if (result > 0)
+                    {
+                        return Ok("Estado de publicación actualizado correctamente.");
+                    }
+                    else
+                    {
+                        return NotFound("Tatuaje no encontrado.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error interno del servidor: {ex.Message}");
             }
         }
     }

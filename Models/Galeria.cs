@@ -8,5 +8,6 @@ namespace BETempleOfInk.Models
         public DateTime FechaPublicacion { get; set; }
         public int IdArtista { get; set; }
         public byte Publicar { get; set; }
+        
     }
 }
