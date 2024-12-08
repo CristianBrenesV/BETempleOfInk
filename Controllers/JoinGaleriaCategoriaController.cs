@@ -18,7 +18,7 @@ namespace BETempleOfInk.Controllers
             _connectionString = configuration.GetConnectionString("DefaultConnection")
                                 ?? throw new InvalidOperationException("La cadena de conexión no está configurada.");
         }
-
+/*
         // GET: api/JoinGaleriaCategoria
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -281,6 +281,6 @@ namespace BETempleOfInk.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error al actualizar la relación de galería y categoría.");
             }
-        }
+        }*/
     }
 }
