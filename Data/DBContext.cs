@@ -27,6 +27,7 @@ namespace BETempleOfInk.Data
         public DbSet<JoinUsuarioMembresia>? JoinUsuarioMembresias { get; set; }
         public DbSet<Membresia>? Membresias { get; set; }
         public DbSet<Chatbot>? Chatbots { get; set; }
+        public DbSet<Subcategoria>? subcategorias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
