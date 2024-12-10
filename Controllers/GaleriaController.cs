@@ -86,14 +86,15 @@ namespace BETempleOfInk.Controllers
                     {
                         if (await reader.ReadAsync())
                         {
-                            var tatuaje = new Galeria
+                            var tatuaje = new GaleriaConSubcategoriasDTO
                             {
-                                IdTatuaje = reader.GetInt32(0),
-                                NombreTatuaje = reader.GetString(1),
-                                ImagenTatuaje = reader.GetString(2),
-                                FechaPublicacion = reader.GetDateTime(3),
-                                IdArtista = reader.GetInt32(4),
-                                Publicar = reader.GetBoolean(5)
+                                IdTatuaje = reader.GetInt32(reader.GetOrdinal("IdTatuaje")),
+                                NombreTatuaje = reader.GetString(reader.GetOrdinal("NombreTatuaje")),
+                                ImagenTatuaje = reader.GetString(reader.GetOrdinal("ImagenTatuaje")),
+                                FechaPublicacion = reader.GetDateTime(reader.GetOrdinal("FechaPublicacion")),
+                                IdArtista = reader.GetInt32(reader.GetOrdinal("IdArtista")),
+                                Publicar = reader.GetBoolean(reader.GetOrdinal("Publicar")),
+                                Subcategorias = reader.GetString(reader.GetOrdinal("Subcategorias")) // Asegúrate de que esta columna exista y se devuelva en tu SP
                             };
 
                             return Ok(tatuaje);
